@@ -1,0 +1,10 @@
+//Scroll checking 
+// when data load on scroll 
+    angular.element($window).bind("scroll", function (element) {
+        if ($scope.DocketItemList.length != $scope.DocketItem.length) {
+            if ($(window).scrollTop() == $(document).height() - $(window).height()) {
+                $scope.DocketItem = $scope.DocketItemList.slice(0, $scope.DocketItem.length + 5);
+                $scope.$apply();
+            }
+        }
+    })
