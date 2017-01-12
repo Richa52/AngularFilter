@@ -12,6 +12,9 @@ html file
 
 js file
 -------
+load
+$scope.CheckNotesLength();
+
 //Check for notes max length
     $scope.CheckNotesLength = function () {
         angular.forEach($scope.DocketItemList, function (value, key) {
@@ -45,4 +48,15 @@ js file
         currentObject.prev().toggle();
         return false;
     }
+    
+    css file
+    -------
+
+.morelink {
+    display: inline-block;
+    text-decoration: underline !important;
+    color: #26ade4;
+    font-style: italic;
+}
+.morelink:hover,.morelink:focus { text-decoration: underline; color: #26ade4; }
 
