@@ -12,8 +12,26 @@ html file
 
 js file
 -------
+var docketCenter = {
+    WebAPIURL: {
+        GetFilter: 'GetFilter',
+        BookmarkItemForUser: 'BookmarkItemForUser',
+    },
+    variables: {
+        showChar: 150, // How many characters are shown by default
+        ellipsestext: "...",
+        moretext: "more>>",
+        lesstext: "Close"
+    }
+}
 load
-$scope.CheckNotesLength();
+controllers.DocketCenterCtrl = function ($scope, $timeout, $anchorScroll, $window, $element, $sce, $compile) {
+    model = $scope;
+
+    //Global variables
+  
+    $scope.DocketItemList = [];
+    $scope.DocketItem = "";
 
 //Check for notes max length
     $scope.CheckNotesLength = function () {
@@ -48,7 +66,7 @@ $scope.CheckNotesLength();
         currentObject.prev().toggle();
         return false;
     }
-    
+}   
     css file
     -------
 
