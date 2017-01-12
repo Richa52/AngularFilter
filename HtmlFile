@@ -1,0 +1,15 @@
+<div ng-app='MyModule' ng-controller='MyController'>
+    <h1>All movies - no filter</h1>
+    <ul ng-repeat="movie in movies">
+        <li>{{movie.name}}</li>
+    </ul>
+
+    <h1>Filtered movies</h1>
+    <ul ng-repeat="movie in movies | filter:showMovie">
+        <li>{{movie.name}}</li>
+    </ul>
+    
+    <label>Comedy</label><input  type="checkbox" ng-model="Filter.Comedy" ng-true-value="Comedy"  data-ng-false-value=''/><br/>
+    <label>Action</label><input  type="checkbox" ng-model="Filter.Action" ng-true-value="Action"  data-ng-false-value=''/><br/>
+    <label>Drama</label><input  type="checkbox" ng-model="Filter.Drama" ng-true-value="Drama"  data-ng-false-value=''/>
+</div>
