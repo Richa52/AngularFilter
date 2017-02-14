@@ -1,0 +1,61 @@
+// simple value passing Directive to another Directive 
+Index.html
+
+<!DOCTYPE html>
+<html ng-app="myApp">
+<head>
+	<title></title>
+<script type="text/javascript" src="https://code.angularjs.org/1.6.1/angular.min.js"></script>
+<script type="text/javascript" src="app.js"></script>
+</head>
+<body>
+<div ng-controller="demoCtrl">
+	<first-dir stateval="stateval"></first-dir>
+	<second-dir stateval="stateval"></second-dir>
+
+</div>
+</body>
+</html>
+
+
+
+----------------------------------------------------------------------
+//app.js file
+var myApp = angular.module("myApp", []);
+myApp.controller('demoCtrl', function($scope){
+	$scope.stateval = "hello";
+});
+//directive 1
+myApp.directive("firstDir",function(){
+	 return {
+        restrict: "E,A",
+        scope: {
+           stateval: "=",
+        },
+        controller: function ($scope) {
+            console.log($scope.stateval);
+            $scope.stateval="Richa";
+            console.log($scope.stateval);
+        }
+        
+    }
+
+});
+//directive 2
+myApp.directive("secondDir",function(){
+	 return {
+        restrict: "E,A",
+        scope: {
+           stateval: "=",
+        },
+        controller: function ($scope) {
+        	setTimeout(function(){
+        		console.log($scope.stateval);	
+        	},1000);
+            
+            
+        }
+        
+    }
+
+});
