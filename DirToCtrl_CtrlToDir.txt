@@ -1,0 +1,284 @@
+Main Controller html file 
+-------------------
+
+<div class="pull-right">
+	//second Directive call 
+	<sort-export  filterobj="filterobj" ></sort-export> 
+	here
+</div>
+<div class="col-xs-3 sidebar affix">
+	//First Directive call 
+        <docket-inoutbox-filter></docket-inoutbox-filter>
+</div>
+
+
+First docket-inoutbox-filter Directive JS file 
+----------------
+// Value assign in scope
+$scope.ExportXLSRequestData = {
+	"TimekeeperListOutput" : $scope.TimekeeperListOutput,
+	"docketDate": docketDate,
+	"docketInboxNumber": docketInboxNumber 
+};
+// first Directive to send into main Ctrl 
+$scope.$emit('filterChange', $scope.ExportXLSRequestData); 
+
+Main Controller JS file 
+-------------------
+ $scope.ExportXLSRequestData = {};
+    $scope.filterobj = {};
+    $scope.$on("filterChange", function (event, filterData) {
+        $scope.filterobj = filterData;
+	// first Directive get data into send into using $broadcast in second Directive
+        $scope.$broadcast("broadcastShortExport", $scope.filterobj);
+    });
+
+
+Second sort-export Directive JS file 
+----------------
+
+app.directive('sortExport', ['$timeout', '$location', function ($timeout, $location) {
+    return {
+        restrict: 'E',
+        scope: {
+            filterobj: "=",
+        },
+        templateUrl: BaseUrl + '/templates/sort-export.html',
+     
+        link: function (scope, element, attrs) {
+            
+            scope.$on("broadcastShortExport", function (event, args) {
+                scope.DocketInOutTimekeeperItems = args.TimekeeperListOutput;
+                scope.DocketInOutNumber = args.docketInboxNumber;
+                scope.DocketInOutSelectedDate = args.docketDate;
+            });
+           
+            scope.DocketInOutflag = false;
+            var x = $location.absUrl();
+            scope.DocketInOutflag = (x.substr(x.lastIndexOf('/') + 1) == "DocketInbox") ? true : false;
+        }
+    };
+}]);
+
+second Directive html file 
+----------------
+// send data into MVC Controller.
+
+<form id="myform" action="/Docket/DocketInOutExportXLS" method="post" class="btn-frm">
+                        <input type="hidden" value="{{DocketInOutflag}}" name="flag" />
+                        <input type="hidden" value="{{DocketInOutSelectedDate}}" name="SelectedDate" />
+                        <input type="hidden" value="{{DocketInOutNumber}}" name="Docketnumber"/>
+                        <input type="hidden" value="{{DocketInOutTimekeeperItems}}" name="TimekeeperList" />
+                        <a class="link-btn formAnchor" onclick="$('#myform').submit()"><i class="icon-xsl"></i> XLS</a>
+                    </form>
+
+
+DocketController.cs
+------------------------------
+ //DOCKET Inbox Export  XLS
+        [HttpPost]
+        public ActionResult DocketInOutExportXLS(bool flag, string SelectedDate, string Docketnumber , string TimekeeperList)
+        {
+            try
+            {
+                var api = (flag) ? "GetDataForFilterDocketInbox" : "GetDataForFilterDocketOutbox";
+                var URL = WebConfigurationManager.AppSettings["APIBaseUrl"] + api;
+                var Requestdata = "{\"objrequest\": {\"user\": \"null\", \"timekeepers\":[{ \"itimekeeperid\": 1},{\"itimekeeperid\": 2},{\"itimekeeperid\": 3}], \"Date\": \"null\", \"DocketNumber\": \"null\"}}";
+                var ExportXLSDataList = GetDocketExcelAPIdata(URL, Requestdata);
+                if (ExportXLSDataList != null)
+                {
+                    ResponseDocketHistoty responseDocket = JsonConvert.DeserializeObject<ResponseDocketHistoty>(ExportXLSDataList);
+                    var workbook = new HSSFWorkbook();
+                    var sheet = workbook.CreateSheet("Sheet1");
+                    sheet.CreateFreezePane(0, 1);
+                    sheet.DefaultColumnWidth = 20;
+
+                    #region Style Sheet
+
+                    ICellStyle rowCellStyleMainHeader = workbook.CreateCellStyle();
+                    IFont font = workbook.CreateFont();
+                    font.Boldweight = (short)FontBoldWeight.BOLD;
+                    font.Color = BLACK.index;
+                    rowCellStyleMainHeader.FillPattern = FillPatternType.NO_FILL;
+                    rowCellStyleMainHeader.Alignment = HorizontalAlignment.CENTER;
+                    rowCellStyleMainHeader.VerticalAlignment = VerticalAlignment.CENTER;
+                    rowCellStyleMainHeader.WrapText = true;
+                    rowCellStyleMainHeader.IsLocked = true;
+                    rowCellStyleMainHeader.SetFont(font);
+
+                    #endregion
+
+                    #region First Header Row
+
+                    var rowIndex = 0;
+                    var rowSubIndex = 0;
+                    var rowsub = sheet.CreateRow(rowSubIndex);
+                    var row = sheet.CreateRow(rowIndex);
+                    row.CreateCell(0).SetCellValue("Action Date");
+                    row.CreateCell(1).SetCellValue("Action Name");
+                    row.CreateCell(2).SetCellValue("Application Date");
+                    row.CreateCell(3).SetCellValue("Application Number");
+                    row.CreateCell(4).SetCellValue("Assistant1 TK Email");
+                    row.CreateCell(5).SetCellValue("Assistant1 TK ID");
+                    row.CreateCell(6).SetCellValue("Assistant1 TK Name");
+                    row.CreateCell(7).SetCellValue("Assistant2 TK Email");
+                    row.CreateCell(8).SetCellValue("Assistant2 TK ID");
+                    row.CreateCell(9).SetCellValue("Assistant2 TK Name");
+                    row.CreateCell(10).SetCellValue("Assistant TK Email");
+                    row.CreateCell(11).SetCellValue("Assistant TK ID");
+                    row.CreateCell(12).SetCellValue("Assistant TK Name");
+                    row.CreateCell(13).SetCellValue("Bookmark");
+                    row.CreateCell(14).SetCellValue("Case Type");
+                    row.CreateCell(15).SetCellValue("Client Name");
+                    row.CreateCell(16).SetCellValue("Docket Deadline Date");
+                    row.CreateCell(17).SetCellValue("Docket Due Date");
+                    row.CreateCell(18).SetCellValue("Docket ID");
+                    row.CreateCell(19).SetCellValue("Docket Note");
+                    row.CreateCell(20).SetCellValue("Docket Status");
+                    row.CreateCell(21).SetCellValue("Docket Type");
+                    row.CreateCell(22).SetCellValue("Docket Number");
+                    row.CreateCell(23).SetCellValue("highlight Docket");
+                    row.CreateCell(24).SetCellValue("History Status");
+                    row.CreateCell(25).SetCellValue("Point TK Email");
+                    row.CreateCell(26).SetCellValue("Point TK ID");
+                    row.CreateCell(27).SetCellValue("Point TK Name");
+                    row.CreateCell(28).SetCellValue("Responsible TK Email");
+                    row.CreateCell(29).SetCellValue("Responsible TK ID");
+                    row.CreateCell(30).SetCellValue("Responsible TK Name");
+                    row.CreateCell(31).SetCellValue("Sticky Note");
+
+                    foreach (var itemStyle in row.Cells)
+                    {
+                        itemStyle.CellStyle = rowCellStyleMainHeader;
+                    }
+
+                    #endregion
+
+                    #region LOOP ROW DATA
+
+
+                    foreach (var item in responseDocket.docketItemsList)
+                    {
+                        rowIndex++;
+                        row = sheet.CreateRow(rowIndex);
+                        row.CreateCell(0).SetCellValue(item.actionDate);
+                        row.CreateCell(1).SetCellValue(item.actionName);
+                        row.CreateCell(2).SetCellValue(item.applicationDate);
+                        row.CreateCell(3).SetCellValue(item.applicationNumber);
+                        row.CreateCell(4).SetCellValue(item.assistant1TKEmail);
+                        row.CreateCell(5).SetCellValue(item.assistant1TKID);
+                        row.CreateCell(6).SetCellValue(item.assistant1TKName);
+                        row.CreateCell(7).SetCellValue(item.assistant2TKEmail);
+                        row.CreateCell(8).SetCellValue(item.assistant2TKID);
+                        row.CreateCell(9).SetCellValue(item.assistant2TKName);
+                        row.CreateCell(10).SetCellValue(item.assistantTKEmail);
+                        row.CreateCell(11).SetCellValue(item.assistantTKID);
+                        row.CreateCell(12).SetCellValue(item.assistantTKName);
+                        var bookmarkValue = (item.bookmark == "1") ? "true" : "false";
+                        row.CreateCell(13).SetCellValue(bookmarkValue);
+                        row.CreateCell(14).SetCellValue(item.caseType);
+                        row.CreateCell(15).SetCellValue(item.clientName);
+                        row.CreateCell(16).SetCellValue(item.docketItemDeadlineDate);
+                        row.CreateCell(17).SetCellValue(item.docketItemDueDate);
+                        row.CreateCell(18).SetCellValue(item.docketItemID);
+                        row.CreateCell(19).SetCellValue(item.docketItemNote);
+                        row.CreateCell(20).SetCellValue(item.docketItemStatus);
+                        row.CreateCell(21).SetCellValue(item.docketItemType);
+                        row.CreateCell(22).SetCellValue(item.docketNumber);
+                        row.CreateCell(23).SetCellValue(item.highlightDocket);
+                        row.CreateCell(24).SetCellValue(item.historyStatus);
+                        row.CreateCell(25).SetCellValue(item.pointTKEmail);
+                        row.CreateCell(26).SetCellValue(item.pointTKID);
+                        row.CreateCell(27).SetCellValue(item.pointTKName);
+                        row.CreateCell(28).SetCellValue(item.responsibleTKEmail);
+                        row.CreateCell(29).SetCellValue(item.responsibleTKID);
+                        row.CreateCell(30).SetCellValue(item.responsibleTKName);
+                        row.CreateCell(31).SetCellValue(item.stickNote);
+
+
+                        // Header of Sub History
+                        rowIndex++;
+                        rowsub = sheet.CreateRow(rowIndex);
+                        rowsub.CreateCell(1).SetCellValue("Action Date");
+                        rowsub.CreateCell(2).SetCellValue("Docketer Comments");
+                        rowsub.CreateCell(3).SetCellValue("Instruction");
+                        rowsub.CreateCell(4).SetCellValue("Requester Comments");
+                        rowsub.CreateCell(5).SetCellValue("Requester Name");
+                        rowsub.CreateCell(6).SetCellValue("Selected Date");
+                        rowsub.CreateCell(7).SetCellValue("Status");
+
+                        foreach (var subitemStyle in rowsub.Cells)
+                        {
+                            subitemStyle.CellStyle = rowCellStyleMainHeader;
+                        }
+
+                        //// Data of Sub History
+                        foreach (var subitem in item.docketItemActionHistoryList)
+                        {
+                            rowIndex++;
+                            rowsub = sheet.CreateRow(rowIndex);
+                            rowsub.CreateCell(1).SetCellValue(subitem.actionDate);
+                            rowsub.CreateCell(2).SetCellValue(subitem.docketerComments);
+                            rowsub.CreateCell(3).SetCellValue(subitem.instruction);
+                            rowsub.CreateCell(4).SetCellValue(subitem.requesterComments);
+                            rowsub.CreateCell(5).SetCellValue(subitem.requesterName);
+                            rowsub.CreateCell(6).SetCellValue(subitem.selectedDate);
+                            rowsub.CreateCell(7).SetCellValue(subitem.status);
+                            sheet.GroupRow(rowIndex, rowIndex + (item.docketItemActionHistoryList.Count));
+                            sheet.SetRowGroupCollapsed(rowIndex, true);
+                        }
+                    }
+
+                    #endregion
+
+                    #region Download XLS
+                    var InOut = (flag) ? "Inbox" : "Outbox";
+                    string strFileName = "Docket" + InOut + "_" + Guid.NewGuid() + ".xls";
+                    MemoryStream output = new MemoryStream();
+                    workbook.Write(output);
+                    LogWriter.Instance.WriteToLog(strFileName + " File Successfully Downloaded.. ");
+                    return File(output.ToArray(), "application/vnd.ms-excel", strFileName);
+
+                    #endregion
+                }
+                else
+                {
+                    LogWriter.Instance.WriteToLog("No docket items available to download!!");
+                    return null;
+                }
+
+            }
+            catch (Exception e)
+            {
+                LogWriter.Instance.WriteToLog("Exception Occurs!! " + e.Message);
+                return null;
+            }
+        }
+
+
+
+ // API call for Docket XLS
+        public static string GetDocketExcelAPIdata(string URL, string Requestdata)
+        {
+
+            var httpWebRequest = (HttpWebRequest)WebRequest.Create(URL);
+            httpWebRequest.ContentType = "application/json";
+            httpWebRequest.Method = "POST";
+
+            using (var streamWriter = new StreamWriter(httpWebRequest.GetRequestStream()))
+            {
+                streamWriter.Write(Requestdata);
+                streamWriter.Flush();
+                streamWriter.Close();
+            }
+
+            var httpResponse = (HttpWebResponse)httpWebRequest.GetResponse();
+            var result = "";
+            using (var streamReader = new StreamReader(httpResponse.GetResponseStream()))
+            {
+                JObject jsonData = JObject.Parse(streamReader.ReadToEnd());
+                result = jsonData.ToString();
+
+            }
+            return result;
+        }

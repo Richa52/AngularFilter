@@ -1,0 +1,76 @@
+http://stackoverflow.com/questions/16881478/how-to-call-a-method-defined-in-an-angularjs-directive
+	
+
+If you want to use isolated scopes you can pass a control object using bi-directional binding = of a variable from the controller scope. You can also control also several instances of the same directive on a page with the same control object.
+
+angular.module('directiveControlDemo', [])
+
+.controller('MainCtrl', function($scope) {
+  $scope.focusinControl = {};
+})
+
+.directive('focusin', function factory() {
+  return {
+    restrict: 'E',
+    replace: true,
+    template: '<div>A:{{internalControl}}</div>',
+    scope: {
+      control: '='
+    },
+    link: function(scope, element, attrs) {
+      scope.internalControl = scope.control || {};
+      scope.internalControl.takenTablets = 0;
+      scope.internalControl.takeTablet = function() {
+        scope.internalControl.takenTablets += 1;
+      }
+    }
+  };
+});
+
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.23/angular.min.js"></script>
+<div ng-app="directiveControlDemo">
+  <div ng-controller="MainCtrl">
+    <button ng-click="focusinControl.takeTablet()">Call directive function</button>
+    <p>
+      <b>In controller scope:</b>
+      {{focusinControl}}
+    </p>
+    <p>
+      <b>In directive scope:</b>
+      <focusin control="focusinControl"></focusin>
+    </p>
+    <p>
+      <b>Without control object:</b>
+      <focusin></focusin>
+    </p>
+  </div>
+</div>
+
+
+
+ In controller scope: {"takenTablets":3}
+
+In directive scope:
+A:{"takenTablets":3}
+
+Without control object:
+A:{"takenTablets":0}
+-------------------------------------OR--------------------------------------------
+In mainController.js
+$scope.focusinControl = {};
+
+
+Index.cshtml
+ng-click="focusinControl.abc(userid,docket.docketNumber)"
+then templetate call (Common Html)
+<docket control="focusinControl"></docket>
+
+In Directive assign control
+scope: {
+            control: '='
+        },
+link: function ($scope, element, attrs) {
+ $scope.control.abc = function(){
+                alert("a");
+            }
+}

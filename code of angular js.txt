@@ -1,0 +1,44 @@
+ng-pattern="/^[0-9]+(?:\.[0-9]+)?$/" // only numeric & Float value
+$scope.TimekeeperListOutput = [];
+var timekeepers = $scope.TimekeeperListOutput.map(function (elem) { return elem.TimeKeeperId; }).join(","); // comma separeted value from list of array
+
+
+compare two object  & add new property in main object
+var data = { "items":[
+    {
+        "id":           1,
+        "category":      "cat1"
+    },
+    {        
+        "id":           2,
+        "category":      "cat2"
+    },
+    {
+        "id":           3,
+        "category":      "cat1"
+    }
+]}; 
+
+
+var data1 = { "items":[
+    {
+        "id":           1,
+        "category":      "cat1"
+    },
+    {        
+        "id":           2,
+        "category":      "cat2"
+    }
+]}; 
+
+
+angular.forEach(data1.items, function (value, key) {
+                                        debugger;
+                                        if (value.id == data.items[key].id) {
+                                           data.items[key]['ticked'] = true;
+
+                                        }
+                                    });
+  
+  
+    console.log(data.items);
