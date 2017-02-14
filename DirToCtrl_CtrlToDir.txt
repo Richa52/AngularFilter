@@ -1,3 +1,5 @@
+//using $broadcast & $emit
+
 Main Controller html file 
 -------------------
 
